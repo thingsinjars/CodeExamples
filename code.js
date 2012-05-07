@@ -11,7 +11,8 @@ function init() {
 }
 
 // Step 2: Prepare to load our Sound
-function loadOurSound(url) {
+function startSound() {
+	var url = sound.url;
 	// Note: this loads asynchronously
     var request = new XMLHttpRequest();
     request.open("GET", url, true);
@@ -35,16 +36,16 @@ function chooseGraph(audioData) {
 						soundOnly(audioData);
 						break;
 		case "soundAndVolume" :
-						soundAndVolume(audioData, 1);
+						soundAndVolume(audioData, 0.1);
 						break;
 		case "soundAndVolumeAndFilter" :
-						soundAndVolumeAndFilter(audioData);
+						soundAndVolumeAndFilter(2, audioData);
 						break;
 		case "soundAndPosition" :
-						soundAndPosition(audioData, {x:0, y: 0, z:0});
+						soundAndPosition(audioData, {x:10, y:0, z:0});
 						break;
 		case "soundAndPositionAndListenerPosition" :
-						soundAndPositionAndListenerPosition(audioData, {x:0, y: 0, z:0}, {x:0, y: 0, z:0});
+						soundAndPositionAndListenerPosition(audioData, {x:0, y: 5, z:0}, {x:0, y: 10, z:0});
 						break;
 		case "soundAndImpulseResponse" :
 						soundAndImpulseResponse(audioData);
@@ -66,3 +67,7 @@ function stopSound() {
     // stop the source now
     sound.soundSource.noteOff(sound.context.currentTime);
 }
+
+// Events for the play/stop bottons
+document.querySelector('#play').addEventListener('click', function() {startSound()});
+document.querySelector('#stop').addEventListener('click', function() {stopSound()});

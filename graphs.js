@@ -13,7 +13,7 @@ function soundOnly(audioData) {
     // create a sound source
     sound.soundSource = sound.context.createBufferSource();
 
-	// The Audio Context handles creating source buffers from rawy binary
+	// The Audio Context handles creating source buffers from raw binary
     sound.soundBuffer = sound.context.createBuffer(audioData, true); // true = "mix to Mono"
 
     // Add the buffered data to our object
@@ -38,17 +38,17 @@ function soundAndVolume(audioData, volume) {
     sound.soundBuffer = sound.context.createBuffer(audioData, true); // true = "mix to Mono"
     sound.soundSource.buffer = sound.soundBuffer;
 
-    sound.VolumeNode = sound.context.createGainNode();
+    sound.volumeNode = sound.context.createGainNode();
 
     //Set the volume
-    sound.VolumeNode.gain.value = volume;
+    sound.volumeNode.gain.value = volume;
 
 	// Wiring
-    sound.soundSource.connect(sound.VolumeNode);
-    sound.VolumeNode.connect(sound.context.destination);
+    sound.soundSource.connect(sound.volumeNode);
+    sound.volumeNode.connect(sound.context.destination);
 
     // Finally
-    playSound(ourSoundSource);
+    playSound(sound.soundSource);
 }
 
 
@@ -57,17 +57,26 @@ function soundAndVolume(audioData, volume) {
 	 
 	 Source ------> Volume ------> Filter ------> Destination
 */
-function soundAndVolumeAndFilter(audioData) {
+function soundAndVolumeAndFilter(volume, audioData) {
+    sound.soundSource = sound.context.createBufferSource();
     sound.soundBuffer = sound.context.createBuffer(audioData, true);
-    sound.soundSource = createSoundSource(sound.soundBuffer);
-    sound.VolumeNode = createVolumeNode();
+    sound.soundSource.buffer = sound.soundBuffer;
+    sound.volumeNode = sound.context.createGainNode();
+    sound.volumeNode.gain.value = volume;
 
+    sound.lowPassFilter = sound.context.createBiquadFilter();
 
-    sound.LowPassFilter = createLowPassFilterNode();
-
-    sound.soundSource.connect(sound.VolumeNode);
-    sound.VolumeNode.connect(sound.LowPassFilter);
-    sound.LowPassFilter.connect(sound.context.destination);
+    // Create and specify parameters for the low-pass filter.
+    sound.lowPassFilter.type = 0; // Low-pass filter
+	
+    sound.lowPassFilter.frequency.value = 440; // Set cutoff to 440 HZ
+    
+	// sound.lowPassFilter.Q.value = 20;
+	
+	// Wiring
+    sound.soundSource.connect(sound.volumeNode);
+    sound.volumeNode.connect(sound.lowPassFilter);
+    sound.lowPassFilter.connect(sound.context.destination);
 
     // Finally
     playSound(sound.soundSource);
@@ -81,16 +90,17 @@ function soundAndVolumeAndFilter(audioData) {
 	 
 */
 function soundAndPosition(audioData, position) {
+    sound.soundSource = sound.context.createBufferSource();
     sound.soundBuffer = sound.context.createBuffer(audioData, true);
-    sound.soundSource = createSoundSource(sound.soundBuffer);
+    sound.soundSource.buffer = sound.soundBuffer;
 
-    sound.Panner = createPanner();
+    sound.panner = sound.context.createPanner();
+	sound.panner.setPosition(position.x,position.y,position.z);
 
-    sound.soundSource.connect(sound.Panner);
-    sound.Panner.connect(sound.context.destination);
+	// Wiring
+    sound.soundSource.connect(sound.panner);
+    sound.panner.connect(sound.context.destination);
 	
-	sound.Panner.setPosition(position.x,position.y,position.z);
-
     // Finally
     playSound(sound.soundSource);
 }
@@ -103,14 +113,16 @@ function soundAndPosition(audioData, position) {
 	 
 */
 function soundAndPositionAndListenerPosition(audioData, sourcePosition, listenerPosition) {
+    sound.soundSource = sound.context.createBufferSource();
     sound.soundBuffer = sound.context.createBuffer(audioData, true);
-    sound.soundSource = createSoundSource(sound.soundBuffer);
-    sound.Panner = createPanner();
-    sound.soundSource.connect(ourPanner);
-    sound.Panner.connect(sound.context.destination);
-	sound.Panner.setPosition(sourcePosition.x,sourcePosition.y,sourcePosition.z);
+    sound.soundSource.buffer = sound.soundBuffer;
+    sound.panner = sound.context.createPanner();
+	sound.panner.setPosition(sourcePosition.x, sourcePosition.y, sourcePosition.z);
+    sound.soundSource.connect(sound.panner);
+    sound.panner.connect(sound.context.destination);
 
-	sound.context.listener.setPosition(listenerPosition.x,listenerPosition.y,listenerPosition.z);
+	// Each context has a single 'Listener' 
+	sound.context.listener.setPosition(listenerPosition.x, listenerPosition.y, listenerPosition.z);
 
     // Finally
     playSound(sound.soundSource);
@@ -125,16 +137,33 @@ function soundAndPositionAndListenerPosition(audioData, sourcePosition, listener
  
  */
 function soundAndImpulseResponse(audioData) {
+    sound.soundSource = sound.context.createBufferSource();
     sound.soundBuffer = sound.context.createBuffer(audioData, true);
-    sound.soundSource = createSoundSource(sound.soundBuffer);
+    sound.soundSource.buffer = sound.soundBuffer;
 	
-    sound.Convolver = createConvolver();
+    // Again, the context handles the difficult bits
+	sound.convolver = sound.context.createConvolver();
 	
-    sound.soundSource.connect(sound.Convolver);
-	
-    sound.Convolver.connect(sound.context.destination);
+    // Wiring
+	sound.soundSource.connect(sound.convolver);
+    sound.convolver.connect(sound.context.destination);
 
-	setReverbImpulseResponse('http://thelab.thingsinjars.com/web-audio-tutorial/ir-chorus.wav', sound.Convolver, function() {playSound(sound.soundSource)});
-	// setReverbImpulseResponse('http://thelab.thingsinjars.com/web-audio-tutorial/ir-backwards.wav', ourConvolver, function() {playSound(ourSoundSource);});
+	// Loading the 'Sound Snapshot' to apply to our audio
+	// setReverbImpulseResponse('http://thelab.thingsinjars.com/web-audio-tutorial/ir-chorus.wav', sound.convolver, function() {playSound()});
+	setReverbImpulseResponse('http://thelab.thingsinjars.com/web-audio-tutorial/ir-backwards.wav', sound.convolver, function() {playSound();});
 
+}
+
+function setReverbImpulseResponse(url, convolver, callback) {
+
+    // Load impulse response asynchronously
+    var request = new XMLHttpRequest();
+    request.open("GET", url, true);
+    request.responseType = "arraybuffer";
+
+    request.onload = function () {
+        convolver.buffer = sound.context.createBuffer(request.response, false);
+		callback();
+    }
+	request.send();
 }
