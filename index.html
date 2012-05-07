@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Web Audio API</title>
+	</head>
+	<body>
+		<select name="steps" id="steps">
+			<option value="soundOnly">Sound</option>
+			<option value="soundAndVolume">Volume</option>
+			<option value="soundAndVolumeAndFilter">Filter</option>
+			<option value="soundAndPosition">Position</option>
+			<option value="soundAndPositionAndListenerPosition">Listener Position</option>
+			<option value="soundAndImpulseResponse">Impulse Response</option>
+		</select>
+		<script src="code.js"></script>
+		<script src="createNodes.js"></script>
+		<script src="graphs.js"></script>
+		<script>
+			var sound = {};  // Our object to hold everything
+		
+			// Step 1
+			init();
+
+			//Step 2
+			loadOurSound('http://thelab.thingsinjars.com/web-audio-tutorial/nokia.mp3');
+		</script>
+	</body>
+</html>
