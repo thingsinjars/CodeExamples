@@ -3,18 +3,22 @@
 	<head>
 		<meta charset="utf-8">
 		<title>Web Audio API</title>
+		<style>body {text-align:center;background:#fefaf9;font:1em sans-serif;}select{display:block;margin:10px auto;width:100px}p{position:absolute;bottom:5px;right:10px;}a{color:#444;}</style>
 	</head>
 	<body>
+		<h1>Web Audio API Examples</h1>
 		<select name="steps" id="steps">
-			<option value="soundOnly">Sound</option>
+			<option value="soundOnly" selected>Sound</option>
 			<option value="soundAndVolume">Volume</option>
 			<option value="soundAndVolumeAndFilter">Filter</option>
 			<option value="soundAndPosition">Position</option>
 			<option value="soundAndPositionAndListenerPosition">Listener Position</option>
 			<option value="soundAndImpulseResponse">Impulse Response</option>
 		</select>
+		<img src="play.png" id="play"> <img src="stop.png" id="stop">
+		<p><a href="https://github.com/thingsinjars/Web-Audio-API-Examples">GitHub</a></p>
+		
 		<script src="code.js"></script>
-		<script src="createNodes.js"></script>
 		<script src="graphs.js"></script>
 		<script>
 			var sound = {};  // Our object to hold everything
@@ -23,7 +27,8 @@
 			init();
 
 			//Step 2
-			loadOurSound('http://thelab.thingsinjars.com/web-audio-tutorial/nokia.mp3');
+			sound.url = 'http://thelab.thingsinjars.com/web-audio-tutorial/nokia.mp3';
+
 		</script>
 	</body>
 </html>
