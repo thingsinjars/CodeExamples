@@ -42,19 +42,22 @@ function chooseGraph(audioData) {
 						soundAndVolumeAndFilter(2, audioData);
 						break;
 		case "soundAndPosition" :
-						soundAndPosition(audioData, {x:10, y:0, z:0});
+						soundAndPosition(audioData, {x:10, y:5, z:0});
 						break;
 		case "soundAndPositionAndListenerPosition" :
-						soundAndPositionAndListenerPosition(audioData, {x:0, y: 5, z:0}, {x:0, y: 10, z:0});
+						soundAndPositionAndListenerPosition(audioData, {x:10, y: 5, z:0}, {x:20, y: -5, z:0});
 						break;
 		case "soundAndImpulseResponse" :
 						soundAndImpulseResponse(audioData);
+						break;
+		case "soundAndImpulseResponseTwoChannels" :
+						soundAndImpulseResponseTwoChannels(audioData);
 						break;
 	}
 }
 
 function selectValue() {
-	return document.querySelectorAll('option')[document.querySelector('#steps').selectedIndex].value;
+	return document.querySelector('.current').dataset['example'];
 }
 
 // Finally: tell the source when to start
@@ -69,5 +72,11 @@ function stopSound() {
 }
 
 // Events for the play/stop bottons
-document.querySelector('#play').addEventListener('click', function() {startSound()});
-document.querySelector('#stop').addEventListener('click', function() {stopSound()});
+var playButtons = document.querySelectorAll('.play');
+for(var i=0;i<playButtons.length;i++) {
+	playButtons[i].addEventListener('click', function() {startSound()});	
+}
+var stopButtons = document.querySelectorAll('.stop');
+for(var i=0;i<stopButtons.length;i++) {
+	stopButtons[i].addEventListener('click', function() {stopSound()});	
+}

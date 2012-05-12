@@ -86,7 +86,7 @@ function soundAndVolumeAndFilter(volume, audioData) {
  Connect the source to the gain node
  and the gain to the destination
 	 
- Source ------> Volume ------> Destination
+ Source ------> Panner ------> Destination
 	 
 */
 function soundAndPosition(audioData, position) {
@@ -109,7 +109,7 @@ function soundAndPosition(audioData, position) {
  Connect the source to the gain node
  and the gain to the destination
 	 
- Source ------> Volume ------> Destination
+ Source ------> Panner ------> [ Listener Panner ------> Destination ]
 	 
 */
 function soundAndPositionAndListenerPosition(audioData, sourcePosition, listenerPosition) {
@@ -149,14 +149,47 @@ function soundAndImpulseResponse(audioData) {
     sound.convolver.connect(sound.context.destination);
 
 	// Loading the 'Sound Snapshot' to apply to our audio
-	// setReverbImpulseResponse('http://thelab.thingsinjars.com/web-audio-tutorial/ir-chorus.wav', sound.convolver, function() {playSound()});
+	setReverbImpulseResponse('http://thelab.thingsinjars.com/web-audio-tutorial/ir-chorus.wav', sound.convolver, function() {playSound()});
+	// setReverbImpulseResponse('http://thelab.thingsinjars.com/web-audio-tutorial/ir-backwards.wav', sound.convolver, function() {playSound();});
+
+}
+
+/*
+ Connect the source to a convolver, 
+ and to a parallel volume
+ attach them both to the destination to demonstrate parallel graphs
+ 
+            |-> Convolver --|
+ Source ----|               |---> Destination
+            |---> Volume ---|
+ 
+ */
+function soundAndImpulseResponseTwoChannels(audioData) {
+    sound.soundSource = sound.context.createBufferSource();
+    sound.soundBuffer = sound.context.createBuffer(audioData, true);
+    sound.soundSource.buffer = sound.soundBuffer;
+    sound.volumeNode = sound.context.createGainNode();
+    sound.volumeNode.gain.value = 1;
+	
+    // Again, the context handles the difficult bits
+	sound.convolver = sound.context.createConvolver();
+	
+    // Wiring
+	sound.soundSource.connect(sound.convolver);
+	sound.convolver.connect(sound.context.destination);
+
+	// More Wiring!
+    sound.soundSource.connect(sound.volumeNode);
+    sound.volumeNode.connect(sound.context.destination);
+
+	// Loading the 'Sound Snapshot' to apply to our audio
 	setReverbImpulseResponse('http://thelab.thingsinjars.com/web-audio-tutorial/ir-backwards.wav', sound.convolver, function() {playSound();});
 
 }
 
 function setReverbImpulseResponse(url, convolver, callback) {
-
-    // Load impulse response asynchronously
+    // As with the main sound source, 
+	// the Impulse Response loads asynchronously
     var request = new XMLHttpRequest();
     request.open("GET", url, true);
     request.responseType = "arraybuffer";

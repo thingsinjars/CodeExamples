@@ -1,23 +1,236 @@
-<!doctype html>
+<!DOCTYPE html>
+
+<!--
+  Google HTML5 slide template
+
+  Authors: Luke Mahé (code)
+           Marcin Wichary (code and design)
+           
+           Dominic Mazzoni (browser compatibility)
+           Charles Chen (ChromeVox support)
+
+  URL: http://code.google.com/p/html5slides/
+-->
+
 <html>
-	<head>
-		<meta charset="utf-8">
-		<title>Web Audio API</title>
-		<style>body {text-align:center;background:#fefaf9;font:1em sans-serif;}select{display:block;margin:10px auto;width:100px}p{position:absolute;bottom:5px;right:10px;}a{color:#444;}</style>
-	</head>
-	<body>
-		<h1>Web Audio API Examples</h1>
-		<select name="steps" id="steps">
-			<option value="soundOnly" selected>Sound</option>
-			<option value="soundAndVolume">Volume</option>
-			<option value="soundAndVolumeAndFilter">Filter</option>
-			<option value="soundAndPosition">Position</option>
-			<option value="soundAndPositionAndListenerPosition">Listener Position</option>
-			<option value="soundAndImpulseResponse">Impulse Response</option>
-		</select>
-		<img src="play.png" id="play"> <img src="stop.png" id="stop">
-		<p><a href="https://github.com/thingsinjars/Web-Audio-API-Examples">GitHub</a></p>
-		
+  <head>
+    <title>Presentation</title>
+
+    <meta charset='utf-8'>
+    <script
+      src='aux/slides.js'></script>
+  </head>
+  
+  <style>
+    /* Your individual styles here, or just use inline styles if that’s
+       what you want. */
+    
+    
+  </style>
+
+  <body style='display: none'>
+
+    <section class='slides layout-regular template-default'>
+      
+      <!-- Your slides (<article>s) go here. Delete or comment out the
+           slides below. -->
+        
+        
+      
+      <article>
+        <h1>
+          Web Audio API
+        </h1>
+        <p>
+          An introduction by example
+        </p>
+      </article>
+      
+      <article>
+        <p>
+          The Web Audio API is...
+        </p>
+        <p>
+          This is an introduction to some of the cool things you can do with it by giving examples.
+        </p>
+        <p>
+          (best with headphones)
+        </p>
+      </article>
+
+      <article>
+        <h3>
+          Audio Routing Graph
+        </h3>
+        <p>
+          Image showing a typical routing graph
+        </p>
+      </article>
+
+      <article>
+        <h3>
+          There can be only one...AudioContext.
+        </h3>
+        <p>
+          The AudioContext holds the destination, listener, etc.
+        </p>
+      </article>
+
+      <article>
+        <h3>
+          Create the sound source
+        </h3>
+		<pre>
+&lt;script type='text/javascript'&gt;
+  // create a sound source
+  soundSource = context.createBufferSource();
+  
+  // The Audio Context handles creating source 
+  // buffers from raw binary data
+  soundBuffer = context.createBuffer(audioData, true/*make mono*/);
+  
+  // Add the buffered data to our object
+  soundSource.buffer = soundBuffer;
+&lt;/script&gt;
+ </pre>
+      </article>
+
+      <article data-example="soundOnly">
+        <h3>
+          Source to Destination
+        </h3>
+        <p>
+          The simplest graph we can make connects a sound source to the destination
+        </p>
+		<pre>
+ // Plug the cable from one thing to the other
+ soundSource.connect(context.destination);
+ </pre>
+		<p><img src="play.png" class="play"> <img src="stop.png" class="stop"></p>
+      </article>
+
+      <article data-example="soundAndVolume">
+        <h3>
+          Source to Volume to Destination
+        </h3>
+        <p>
+          Once you start creating multiple nodes, you can chain them in series
+        </p>
+		<pre>
+  // Create a volume (gain) node
+  volumeNode = context.createGainNode();
+
+  //Set the volume
+  volumeNode.gain.value = 0.1;
+
+  // Wiring
+  soundSource.connect(volumeNode);
+  volumeNode.connect(context.destination);
+ </pre>
+		<p><img src="play.png" class="play"> <img src="stop.png" class="stop"></p>
+      </article>
+
+      <article data-example="soundAndVolumeAndFilter">
+        <h3>
+          Source to Volume to Filter to Destination
+        </h3>
+		<p>This filter only lets lower frequencies through</p>
+		<pre>
+  filterNode = context.createBiquadFilter();
+
+  // Create and specify parameters for the low pass filter.
+  filterNode.type = 0; // Low pass filter	
+  filterNode.frequency.value = 440; // Set cutoff to 440 HZ
+    
+  soundSource.connect(volumeNode);
+  volumeNode.connect(filterNode);
+  filterNode.connect(context.destination);
+ </pre>
+		<p><img src="play.png" class="play"> <img src="stop.png" class="stop"></p>
+      </article>
+
+      <article data-example="soundAndPosition">
+        <h3>
+          Positional Nodes
+        </h3>
+		<p>The panner node allows the sound to be positioned in 3D-space relative to the listener.</p>
+		<pre>
+  sound.panner = sound.context.createPanner();
+  sound.panner.setPosition(10, 5, 0);
+  
+  sound.soundSource.connect(sound.panner);
+  sound.panner.connect(sound.context.destination);
+  </pre>
+		<p><img src="play.png" class="play"> <img src="stop.png" class="stop"></p>
+      </article>
+
+      <article data-example="soundAndPositionAndListenerPosition">
+        <h3>Complex positional nodes</h3>
+		<p>The panner node allows the sound to be positioned in 3D-space relative to the listener.</p>
+		<pre>
+  panner = context.createPanner();
+  panner.setPosition(10, 5, 0);
+  soundSource.connect(panner);
+  panner.connect(context.destination);
+  
+  // Each context has a single 'Listener' 
+  context.listener.setPosition(20, -5, 0);
+   	  	</pre>
+		<p><img src="play.png" class="play"> <img src="stop.png" class="stop"></p>
+      </article>
+
+      <article>
+        <h3>Impulse Responses</h3>
+		<p>An '<a href="http://en.wikipedia.org/wiki/Impulse_response" title="Impulse response - Wikipedia, the free encyclopedia">Impulse Response</a>' can be thought of as the acoustic equivalent of a photograph of a room. By measuring the acoustics (echoes, harmonics, etc) generated by a very loud, very short noise, it&rsquo;s possible to capture that room's characteristics.</p>
+      </article>
+
+      <article>
+        <h3>Convolution</h3>
+		<p>Clever mathematics that combines two waves. If you do this with an original sound source and an impulse response, you can make the original sound take on the acoustic properties of the impulse response. </p>
+		<p class="build">A ticking clock <span>+ impulse response of a hallway</span><span><br> = noise of a ticking clock in a hallway</p>
+      </article>
+
+      <article data-example="soundAndImpulseResponse">
+        <h3>Convolution in the graph</h3>
+		<p>You can create a convolver just like any other node and include it in the processing chain.</p>
+		<pre>
+  convolver = context.createConvolver();
+  soundSource.connect(convolver);
+  convolver.connect(context.destination);
+  
+  // Load the impulse response via XHR
+  var request = new XMLHttpRequest();
+  request.open("GET", url, true);
+  request.responseType = "arraybuffer";
+  request.onload = function () {
+   convolver.buffer = context.createBuffer(request.response, false);
+  }
+  request.send();
+	  	</pre>
+		<p><img src="play.png" class="play"> <img src="stop.png" class="stop"></p>
+      </article>
+
+      <article data-example="soundAndImpulseResponseTwoChannels">
+        <h3>Parallel sound channels</h3>
+		<p>All the examples so far have been serial but this API can also process routes in parallel.</p>
+		<pre>
+  volumeNode = context.createGainNode();
+  	
+  convolver = context.createConvolver();
+  	
+  // Wiring
+  soundSource.connect(convolver);
+  convolver.connect(context.destination);
+  
+  // More Wiring!
+  soundSource.connect(volumeNode);
+  volumeNode.connect(context.destination);
+  		</pre>
+		<p><img src="play.png" class="play"> <img src="stop.png" class="stop"></p>
+      </article>
+
+    </section>
+
 		<script src="code.js"></script>
 		<script src="graphs.js"></script>
 		<script>
@@ -28,7 +241,6 @@
 
 			//Step 2
 			sound.url = 'http://thelab.thingsinjars.com/web-audio-tutorial/nokia.mp3';
-
 		</script>
-	</body>
+  </body>
 </html>
